@@ -1,6 +1,7 @@
 #![cfg(target_os = "windows")]
 
-pub mod RustComponent;
+mod component;
+use component as RustComponent;
 
 use windows::core::{implement, HSTRING, IInspectable};
 use windows as Windows;

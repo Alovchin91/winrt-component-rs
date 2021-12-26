@@ -44,4 +44,3 @@ Cargo.lock
 
 # Nuget packages
 packages/
-nuget.exe
