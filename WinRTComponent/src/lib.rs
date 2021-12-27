@@ -1,8 +1,8 @@
 #![cfg(target_os = "windows")]
+#![allow(non_snake_case)]
 
 mod component;
 
-use std::ffi::c_void;
 use std::mem::ManuallyDrop;
 
 use component as RustComponent;
@@ -13,7 +13,6 @@ use windows as Windows;
 #[implement(RustComponent::ISample)]
 struct Sample;
 
-#[allow(non_snake_case)]
 impl Sample {
     pub fn Greeting(&self) -> Result<String, ::windows::core::Error> {
         todo!()
@@ -31,13 +30,20 @@ impl Sample {
 #[implement(Windows::Win32::System::WinRT::IActivationFactory)]
 struct SampleFactory;
 
-#[allow(non_snake_case)]
 impl SampleFactory {
     pub unsafe fn ActivateInstance(&self) -> ::windows::core::Result<IInspectable> {
-        let sample = Sample;
-        sample.cast()
+        Ok(Sample.into())
     }
 }
+
+#[allow(overflowing_literals)]
+mod consts {
+    use windows::core::HRESULT;
+
+    pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
+    pub const S_OK: HRESULT = HRESULT(0);
+}
+use consts::*;
 
 #[no_mangle]
 pub unsafe extern "stdcall" fn DllCanUnloadNow() -> i32 {
@@ -45,19 +51,18 @@ pub unsafe extern "stdcall" fn DllCanUnloadNow() -> i32 {
 }
 
 #[no_mangle]
-pub unsafe extern "stdcall" fn DllGetActivationFactory(class_id: ManuallyDrop<HSTRING>, factory: *mut *mut c_void) -> HRESULT {
-    if *class_id != "RustComponent.Sample" {
-        return HRESULT(-2147221231i32); // CLASS_E_CLASSNOTAVAILABLE
-    }
-
-    let sample_factory = SampleFactory;
-
-    if let Ok(val) = sample_factory.cast::<Windows::Win32::System::WinRT::IActivationFactory>() {
-        let boxed_val = Box::new(val);
-        *factory = Box::into_raw(boxed_val) as *mut c_void;
-
-        HRESULT(0)
-    } else {
-        HRESULT(-2147221231i32) // CLASS_E_CLASSNOTAVAILABLE
+pub unsafe extern "stdcall" fn DllGetActivationFactory(
+    class_id: ManuallyDrop<HSTRING>,
+    factory: *mut Option<Windows::Win32::System::WinRT::IActivationFactory>
+) -> HRESULT {
+    match &*class_id {
+        id if id == "RustComponent.Sample" => {
+            *factory = Some(SampleFactory.into());
+            S_OK
+        },
+        _ => {
+            *factory = None;
+            CLASS_E_CLASSNOTAVAILABLE
+        }
     }
 }
