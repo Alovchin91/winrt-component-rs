@@ -1,13 +1,12 @@
 namespace RustComponent
 {
-    interface ISample
+    [default_interface]
+    runtimeclass Sample
     {
+        Sample();
+        
         String Greeting;
 
         void PrintGreeting();
-    }
-
-    runtimeclass Sample : [default] ISample
-    {
     }
 }

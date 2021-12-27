@@ -1,9 +1,13 @@
 #![cfg(target_os = "windows")]
 
 mod component;
+
+use std::ffi::c_void;
+use std::mem::ManuallyDrop;
+
 use component as RustComponent;
 
-use windows::core::{implement, HSTRING, IInspectable};
+use windows::core::{implement, HRESULT, HSTRING, IInspectable};
 use windows as Windows;
 
 #[implement(RustComponent::ISample)]
@@ -30,6 +34,30 @@ struct SampleFactory;
 #[allow(non_snake_case)]
 impl SampleFactory {
     pub unsafe fn ActivateInstance(&self) -> ::windows::core::Result<IInspectable> {
-        todo!()
+        let sample = Sample;
+        sample.cast()
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "stdcall" fn DllCanUnloadNow() -> i32 {
+    0 // FALSE
+}
+
+#[no_mangle]
+pub unsafe extern "stdcall" fn DllGetActivationFactory(class_id: ManuallyDrop<HSTRING>, factory: *mut *mut c_void) -> HRESULT {
+    if *class_id != "RustComponent.Sample" {
+        return HRESULT(-2147221231i32); // CLASS_E_CLASSNOTAVAILABLE
+    }
+
+    let sample_factory = SampleFactory;
+
+    if let Ok(val) = sample_factory.cast::<Windows::Win32::System::WinRT::IActivationFactory>() {
+        let boxed_val = Box::new(val);
+        *factory = Box::into_raw(boxed_val) as *mut c_void;
+
+        HRESULT(0)
+    } else {
+        HRESULT(-2147221231i32) // CLASS_E_CLASSNOTAVAILABLE
     }
 }
