@@ -14,8 +14,8 @@ use windows as Windows;
 struct Sample;
 
 impl Sample {
-    pub fn Greeting(&self) -> Result<String, ::windows::core::Error> {
-        todo!()
+    pub fn Greeting(&self) -> Result<HSTRING, ::windows::core::Error> {
+        Ok(HSTRING::from("Hello, world!"))
     }
 
     pub fn SetGreeting(&self, value: &HSTRING) -> Result<(), ::windows::core::Error> {
