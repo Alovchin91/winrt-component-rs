@@ -2,9 +2,6 @@
 #![allow(non_snake_case)]
 
 mod component;
-
-use std::mem::ManuallyDrop;
-
 use component as RustComponent;
 
 use windows::core::{implement, HRESULT, HSTRING, IInspectable};
@@ -17,6 +14,7 @@ mod consts {
     pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
     pub const E_INVALIDARG: HRESULT = HRESULT(0x80070057);
     pub const S_OK: HRESULT = HRESULT(0);
+    pub const S_FALSE: HRESULT = HRESULT(1);
 }
 use consts::*;
 
@@ -30,11 +28,11 @@ impl Sample {
         Self { greeting: "Hello, world!".to_string() }
     }
 
-    pub fn Greeting(&self) -> Result<HSTRING, ::windows::core::Error> {
+    pub fn Greeting(&self) -> windows::core::Result<HSTRING> {
         Ok(HSTRING::from(&self.greeting))
     }
 
-    pub fn SetGreeting(&mut self, value: &HSTRING) -> Result<(), ::windows::core::Error> {
+    pub fn SetGreeting(&mut self, value: &HSTRING) -> windows::core::Result<()> {
         self.greeting = String::from_utf16(value.as_wide())
             .or_else(|err|
                 Err(windows::core::Error::new(E_INVALIDARG, err.to_string().into()))
@@ -42,7 +40,7 @@ impl Sample {
         Ok(())
     }
 
-    pub fn PrintGreeting(&self) -> Result<(), ::windows::core::Error> {
+    pub fn PrintGreeting(&self) -> windows::core::Result<()> {
         println!("{}", self.greeting);
         Ok(())
     }
@@ -58,13 +56,13 @@ impl SampleFactory {
 }
 
 #[no_mangle]
-pub unsafe extern "stdcall" fn DllCanUnloadNow() -> i32 {
-    0 // FALSE
+pub extern "stdcall" fn DllCanUnloadNow() -> HRESULT {
+    S_FALSE
 }
 
 #[no_mangle]
 pub unsafe extern "stdcall" fn DllGetActivationFactory(
-    class_id: ManuallyDrop<HSTRING>,
+    class_id: std::mem::ManuallyDrop<HSTRING>,
     factory: *mut Option<Windows::Win32::System::WinRT::IActivationFactory>
 ) -> HRESULT {
     match &*class_id {
