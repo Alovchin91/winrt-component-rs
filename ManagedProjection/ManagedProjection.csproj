@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CsWinRTIncludes>RustComponent</CsWinRTIncludes>
+    <CsWinRTWindowsMetadata>..\tools\packages\Microsoft.Windows.SDK.CPP.10.0.22000.196\c\References\10.0.22000.0</CsWinRTWindowsMetadata>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.4.1" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <Reference Include="RustComponent">
+      <HintPath>..\WinRTComponent\.windows\winmd\RustComponent.winmd</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
