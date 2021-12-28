@@ -9,7 +9,7 @@ fn main() -> Result<()> {
 
     let crate_path : PathBuf = env::var("CARGO_MANIFEST_DIR")?.into();
 
-    let tools_path = crate_path.join("tools");
+    let tools_path = crate_path.parent().unwrap().join("tools");
 
     println!("cargo:warning=Installing NuGet packages. This might take a while...");
 
