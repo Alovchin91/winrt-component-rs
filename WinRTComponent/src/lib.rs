@@ -10,20 +10,41 @@ use component as RustComponent;
 use windows::core::{implement, HRESULT, HSTRING, IInspectable};
 use windows as Windows;
 
+#[allow(overflowing_literals)]
+mod consts {
+    use windows::core::HRESULT;
+
+    pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
+    pub const E_INVALIDARG: HRESULT = HRESULT(0x80070057);
+    pub const S_OK: HRESULT = HRESULT(0);
+}
+use consts::*;
+
 #[implement(RustComponent::ISample)]
-struct Sample;
+struct Sample {
+    greeting: String
+}
 
 impl Sample {
-    pub fn Greeting(&self) -> Result<HSTRING, ::windows::core::Error> {
-        Ok(HSTRING::from("Hello, world!"))
+    pub fn new() -> Self {
+        Self { greeting: "Hello, world!".to_string() }
     }
 
-    pub fn SetGreeting(&self, value: &HSTRING) -> Result<(), ::windows::core::Error> {
-        todo!()
+    pub fn Greeting(&self) -> Result<HSTRING, ::windows::core::Error> {
+        Ok(HSTRING::from(&self.greeting))
+    }
+
+    pub fn SetGreeting(&mut self, value: &HSTRING) -> Result<(), ::windows::core::Error> {
+        self.greeting = String::from_utf16(value.as_wide())
+            .or_else(|err|
+                Err(windows::core::Error::new(E_INVALIDARG, err.to_string().into()))
+            )?;
+        Ok(())
     }
 
     pub fn PrintGreeting(&self) -> Result<(), ::windows::core::Error> {
-        todo!()
+        println!("{}", self.greeting);
+        Ok(())
     }
 }
 
@@ -32,18 +53,9 @@ struct SampleFactory;
 
 impl SampleFactory {
     pub unsafe fn ActivateInstance(&self) -> ::windows::core::Result<IInspectable> {
-        Ok(Sample.into())
+        Ok(Sample::new().into())
     }
 }
-
-#[allow(overflowing_literals)]
-mod consts {
-    use windows::core::HRESULT;
-
-    pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
-    pub const S_OK: HRESULT = HRESULT(0);
-}
-use consts::*;
 
 #[no_mangle]
 pub unsafe extern "stdcall" fn DllCanUnloadNow() -> i32 {
