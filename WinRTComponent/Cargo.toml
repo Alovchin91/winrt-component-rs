@@ -7,6 +7,7 @@ edition = "2021"
 version = "0.29.0"
 features = [
     "build",
+    "Win32_Foundation",
     "Win32_System_WinRT"
 ]
 

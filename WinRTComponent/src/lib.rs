@@ -5,17 +5,8 @@ mod component;
 use component as RustComponent;
 
 use windows::core::{implement, HRESULT, HSTRING, IInspectable};
+use windows::Win32::Foundation::{CLASS_E_CLASSNOTAVAILABLE, S_OK, S_FALSE};
 use windows as Windows;
-
-#[allow(overflowing_literals)]
-mod consts {
-    use windows::core::HRESULT;
-
-    pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
-    pub const S_OK: HRESULT = HRESULT(0);
-    pub const S_FALSE: HRESULT = HRESULT(1);
-}
-use consts::*;
 
 #[implement(RustComponent::ISample)]
 struct Sample {
