@@ -4,6 +4,7 @@ namespace RustComponent
     runtimeclass Sample
     {
         Sample();
+        Sample(String greeting);
         
         String Greeting;
 

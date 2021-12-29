@@ -12,7 +12,6 @@ mod consts {
     use windows::core::HRESULT;
 
     pub const CLASS_E_CLASSNOTAVAILABLE: HRESULT = HRESULT(0x80040111);
-    pub const E_INVALIDARG: HRESULT = HRESULT(0x80070057);
     pub const S_OK: HRESULT = HRESULT(0);
     pub const S_FALSE: HRESULT = HRESULT(1);
 }
@@ -20,23 +19,24 @@ use consts::*;
 
 #[implement(RustComponent::ISample)]
 struct Sample {
-    greeting: String
+    greeting: HSTRING
 }
 
 impl Sample {
     pub fn new() -> Self {
-        Self { greeting: "Hello, world!".to_string() }
+        Self { greeting: "Hello, world!".into() }
+    }
+
+    pub fn new_with_greeting(greeting: &HSTRING) -> Self {
+        Self { greeting: greeting.to_owned() }
     }
 
     pub fn Greeting(&self) -> windows::core::Result<HSTRING> {
-        Ok(HSTRING::from(&self.greeting))
+        Ok(self.greeting.clone())
     }
 
     pub fn SetGreeting(&mut self, value: &HSTRING) -> windows::core::Result<()> {
-        self.greeting = String::from_utf16(value.as_wide())
-            .or_else(|err|
-                Err(windows::core::Error::new(E_INVALIDARG, err.to_string().into()))
-            )?;
+        self.greeting = value.to_owned();
         Ok(())
     }
 
@@ -46,12 +46,19 @@ impl Sample {
     }
 }
 
-#[implement(Windows::Win32::System::WinRT::IActivationFactory)]
+#[implement(
+    Windows::Win32::System::WinRT::IActivationFactory,
+    RustComponent::ISampleFactory
+)]
 struct SampleFactory;
 
 impl SampleFactory {
-    pub unsafe fn ActivateInstance(&self) -> ::windows::core::Result<IInspectable> {
+    pub fn ActivateInstance(&self) -> windows::core::Result<IInspectable> {
         Ok(Sample::new().into())
+    }
+
+    pub fn CreateInstance(&self, greeting: &HSTRING) -> windows::core::Result<IInspectable> {
+        Ok(Sample::new_with_greeting(greeting).into())
     }
 }
 

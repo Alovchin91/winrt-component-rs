@@ -61,17 +61,15 @@ fn main() -> Result<()> {
         panic!("midl.exe command failed with exit code {}", status);
     }
 
-    let gen = windows_bindgen::Gen {
-        ..Default::default()
-    };
+    let gen = windows_bindgen::Gen::default();
 
     let mut res = "#![allow(non_snake_case)] ".to_string();
     res += &windows_bindgen::gen_type("RustComponent.ISample", &gen);
+    res += &windows_bindgen::gen_type("RustComponent.ISampleFactory", &gen);
 
     let gen_path = crate_path.join(r"src\component.rs");
 
-    std::fs::write(&gen_path, res)
-        .context("Failed to write generated code.")?;
+    std::fs::write(&gen_path, res)?;
 
     Command::new("rustfmt")
         .arg(&gen_path)
