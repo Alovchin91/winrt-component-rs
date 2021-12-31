@@ -60,8 +60,8 @@ pub extern "stdcall" fn DllCanUnloadNow() -> HRESULT {
 
 #[no_mangle]
 pub unsafe extern "stdcall" fn DllGetActivationFactory(
-    class_id: std::mem::ManuallyDrop<HSTRING>,
-    factory: *mut Option<Windows::Win32::System::WinRT::IActivationFactory>
+    class_id: core::mem::ManuallyDrop<HSTRING>,
+    factory: *mut core::option::Option<Windows::Win32::System::WinRT::IActivationFactory>
 ) -> HRESULT {
     match &*class_id {
         id if id == "RustComponent.Sample" => {
