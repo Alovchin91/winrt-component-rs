@@ -12,7 +12,6 @@ features = [
 ]
 
 [build-dependencies]
-anyhow = "1.0"
 cc = "1.0.72"
 windows-bindgen = "0.29.0"
 
