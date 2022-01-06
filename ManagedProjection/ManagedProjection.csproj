@@ -18,6 +18,8 @@
   <ItemGroup>
     <Reference Include="RustComponent">
       <HintPath>..\WinRTComponent\.windows\winmd\RustComponent.winmd</HintPath>
+      <Implementation>..\WinRTComponent\target\debug\RustComponent.dll</Implementation>
+      <IsWinMDFile>true</IsWinMDFile>
     </Reference>
   </ItemGroup>
 
